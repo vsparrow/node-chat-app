@@ -1,23 +1,23 @@
 const path = require("path");
-const express = require("express")
+const http = require("http");
+const express = require("express");
+const sio = require("socket.io");
 
-const publicPath = path.join(__dirname, "../public")
-var app = express();
-const port = process.env.PORT || 3000
-app.use(express.static(publicPath));
+const publicPath = path.join(__dirname, "../public");
+const port = process.env.PORT || 3000;
+var app = express(); //currently we use express to make our web server
+var server = http.createServer(app);//((req,res)=>{})//app.listen creates this exact same method
+var io = sio(server); //what we get back is our web sockets server
 
-// console.log(__dirname + "/../public")
-// console.log(publicPath)
-// console.log(publicPath + "/index.html")
-// var indexHtml = publicPath + "/index.html";
-// console.log(indexHtml)
+app.use(express.static(publicPath)); //vreate app, configure middleware
 
-
-// app.get("/",(req,res)=>{res.sendFile(indexHtml)})
-// app.get("/",(req,res)=>{res.send("HI")})
-// app.get("/",(req,res)=>{res.sendFile(publicPath + "/index.html")})
-
-// app.listen(process.env.PORT, process.env.IP, ()=>{
-app.listen(port, process.env.IP, ()=>{
-    console.log("Server started on ",process.env.PORT, process.env.IP);
+io.on("connection",(socket)=>{
+    console.log("New user conneected");
+    socket.on("disconnect",()=>{console.log("User disconnected")})
+    
 })
+
+server.listen(port, ()=>{  //call app.listen
+    console.log("APP STARTED")
+});
+
