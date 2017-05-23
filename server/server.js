@@ -3,6 +3,7 @@ const http = require("http");
 const express = require("express");
 const sio = require("socket.io");
 
+const {generateMessage} = require("./utils/message.js");
 const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT || 3000;
 var app = express(); //currently we use express to make our web server
@@ -13,18 +14,22 @@ app.use(express.static(publicPath)); //vreate app, configure middleware
 
 io.on("connection",(socket)=>{
     console.log("New user conneected");
-    socket.emit("newMessage",{from: "Admin", text: "Welcome to the chat app",createdAt : new Date().getTime()})
-    socket.broadcast.emit("newMessage",{from: "Admin", text: "New user joined",
-        createdAt : new Date().getTime()
-    })
+    
+    //BEFORE and AFTER use of generateMessage function we made
+    //emit is for single user, broadcast is for everyone but that user
+    // socket.emit("newMessage",{from: "Admin", text: "Welcome to the chat app",createdAt : new Date().getTime()})
+    socket.emit("newMessage", generateMessage("Admin","Welcome to the chat app"));
+    // socket.broadcast.emit("newMessage",{from: "Admin", text: "New user joined",createdAt : new Date().getTime()})
+    socket.broadcast.emit("newMessage",generateMessage("Admin","New user joined"));
 
     socket.on("createMessage",(message)=>{
         console.log("createMessage",message)
-        io.emit("newMessage",{
-            from: message.from,
-            text : message.text,
-            createdAt : new Date().getTime()
-        })
+        io.emit("newMessage", generateMessage(message.from,message.text));
+        // {
+        //     from: message.from,
+        //     text : message.text,
+        //     createdAt : new Date().getTime()
+        // })
         // socket.broadcast.emit("newMessage",{
         //     from: message.from,
         //     text : message.text,
