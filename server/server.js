@@ -49,15 +49,33 @@ io.on("connection",(socket)=>{
     });
 
     socket.on("createMessage",(message,callback)=>{
-        console.log("createMessage",message)
-        io.emit("newMessage", generateMessage(message.from,message.text));
+        // console.log("createMessage",message)
+        var user = users.getUser(socket.id);
+        if(user && isRealString(message.text)) { //if user exists and message  = real string
+            io.to(user.room).emit("newMessage", generateMessage(user.name,message.text));                
+            // console.log("user.room",user.room)
+            // // socket.broadcast.to(user.room).emit("newMessage", generateMessage(message.from,message.text));                
+            // console.log(generateMessage(user.name,message.text))
+            // socket.broadcast.to(user.room).emit("newMessage", generateMessage(user.name,message.text));                
+
+        }
+
         callback();
         
         
     })
+
+//find user // if user emit io.emit to just people in room // user user's real name // 
     socket.on("createLocationMessage",(coords)=>{
-        io.emit("newLocationMessage",
-            generateLocationMessage('Admin',coords.latitude,coords.longitude));
+        var user = users.getUser(socket.id);
+        if(user) { //if user exists and message  = real string        
+        
+            console.log(user);
+        io.to(user.room).emit("newLocationMessage",
+            generateLocationMessage(user.name,coords.latitude,coords.longitude));            
+        }    
+        // io.emit("newLocationMessage",
+        //     generateLocationMessage('Admin',coords.latitude,coords.longitude));
     })
     socket.on("disconnect",()=>{
         // console.log("User disconnected")
